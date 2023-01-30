@@ -1,0 +1,127 @@
+
+
+CHIP cw2 {
+  IN indata[8], enable, load;
+  OUT sout, complete;
+
+  PARTS:
+  // STORE EACH BIT IN A 1 BIT REGISTER
+  Bit(x=indata[0], load=load, out=i0);
+  Bit(x=indata[1], load=load, out=i1);
+  Bit(x=indata[2], load=load, out=i2);
+  Bit(x=indata[3], load=load, out=i3);
+  Bit(x=indata[4], load=load, out=i4);
+  Bit(x=indata[5], load=load, out=i5);
+  Bit(x=indata[6], load=load, out=i6);
+  Bit(x=indata[7], load=load, out=i7);
+
+  // MAKE SURE THE INPUT IS 1 FOR ONE TIME THING
+
+  DFF(x=enable, out=enabletneg1);
+  Not(x=enabletneg1, out=notenabletneg1);
+  And(x=enable, y=notenabletneg1, out=SF2);
+
+  And(x=compHeld, y=enable, out=compAndEnable);
+  DFF(x=compAndEnable, out=compAndEnableHeld);
+  Or(x=compAndEnable, y=SF2, out=SF);
+
+
+  Not(x=compAndEnableHeld, out=notcompAndEnableHeld);
+  // And(x=SF2, y=notcompAndEnableHeld, out=SF);
+
+  // TURN THE ENABLE THAT'S ON FOR 1 TIME UNIT AND STRETCH IT TO 8
+  DFF(x=SF, out=o1);
+  Or(x=o1, y=SF, out=o2);
+
+  DFF(x=o2, out=o3);
+  Or(x=o3, y=SF, out=o4);
+  
+  DFF(x=o4, out=o5);
+  Or(x=o5, y=SF, out=o6);
+  
+  DFF(x=o6, out=o7);
+  Or(x=o7, y=SF, out=o8);
+  
+  DFF(x=o8, out=o9);
+  Or(x=o9, y=SF, out=o10);
+  
+  DFF(x=o10, out=o11);
+  Or(x=o11, y=SF, out=o12);
+  
+  DFF(x=o12, out=o13);
+  Or(x=o13, y=SF, out=o14);
+  
+  DFF(x=o14, out=o15);
+  Or(x=o15, y=SF, out=o16);
+  
+  DFF(x=o16, out=shift1);
+
+  And(x=o16, y=shift1, out=shift);
+  
+  // TURN THE BITS FROM PARALLEL TO SERIAL
+  
+  DFF(x=rBit, out=compHeld);
+  Not(x=shift, out=nShift);
+  Or(x=nShift, y=compHeld, out=Load);
+
+  DFF(x=i7, out=ff0Out);
+
+  And(x=ff0Out, y=shift, out=and1Out);
+  And(x=i6, y=Load, out=and2Out);
+  Or(x=and1Out, y=and2Out, out=ff1In);
+
+  DFF(x=ff1In, out=ff1Out);
+
+  And(x=ff1Out, y=shift, out=and3Out);
+  And(x=i5, y=Load, out=and4Out);
+  Or(x=and3Out, y=and4Out, out=ff2In);
+
+  DFF(x=ff2In, out=ff2Out);
+
+  And(x=ff2Out, y=shift, out=And5Out);
+  And(x=i4, y=Load, out=And6Out);
+  Or(x=And5Out, y=And6Out, out=ff3In);
+
+  DFF(x=ff3In, out=ff3Out);
+
+  And(x=ff3Out, y=shift, out=And7Out);
+  And(x=i3, y=Load, out=And8Out); 
+  Or(x=And7Out, y=And8Out, out=ff4In);
+
+  DFF(x=ff4In, out=ff4Out);
+
+  And(x=ff4Out, y=shift, out=And9Out);
+  And(x=i2, y=Load, out=And10Out); 
+  Or(x=And9Out, y=And10Out, out=ff5In);
+
+  DFF(x=ff5In, out=ff5Out);
+
+  And(x=ff5Out, y=shift, out=And11Out);
+  And(x=i1, y=Load, out=And12Out); 
+  Or(x=And11Out, y=And12Out, out=ff6In);
+
+  DFF(x=ff6In, out=ff6Out);
+
+  And(x=ff6Out, y=shift, out=And13Out);
+  And(x=i0, y=Load, out=And14Out); 
+  Or(x=And13Out, y=And14Out, out=ff7In);
+
+  DFF(x=ff7In, out=ff7Out);  
+
+
+  Mux(x=false, y=ff7Out, sel=shift, out=sout);
+
+  // MAKE A LINE OF DFFS TO HOLD THE COMPLETE BIT  
+  DFF(x=SF, out=complete1);
+  DFF(x=complete1, out=complete2);  
+  DFF(x=complete2, out=complete3);  
+  DFF(x=complete3, out=complete4);  
+  DFF(x=complete4, out=complete5);  
+  DFF(x=complete5, out=complete6);  
+  DFF(x=complete6, out=complete7);  
+  DFF(x=complete7, out=rBit, out=complete);
+
+ 
+  
+ 
+}
